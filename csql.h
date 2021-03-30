@@ -2,36 +2,26 @@
 #define CSQL_H
 
 #include "csqlselect.h"
+#include <csqlbool.h>
 
-struct CSQL
+namespace CSQL
 {
-private:
-    template<int Ap, int Rp, int S, typename L>
-    static constexpr void write(L& arra, const char arr[S]) {
-        arra[Ap] = arr[Rp];
-        if constexpr (Rp != S) write<Ap + 1, Rp + 1, S>(arra, arr);
-    }
-
-    template<int I, typename L, typename H, int HS>
-    static constexpr void head(L& arra, H (&h)[HS]) {
-        write<I, 0, HS>(arra, h);
-    }
-
-    template<int I, typename L, typename H, int HS, typename ... Args, int... S>
-    static constexpr void head(L& arra, H (&h)[HS], Args (&...arr)[S]) {
-        write<I, 0, HS - 1>(arra, h);
-        arra[I + HS - 1] = ',';
-        head<I + HS>(arra, arr...);
-    }
-
-public:
     template<typename ...Ts, int... S>
     static constexpr auto select(Ts (&...arr)[S]) {
-        local<(S + ...) + 1 + 7> arra;
-        write<0, 0, 7>(arra, "SELECT ");
-        head<7>(arra, arr...);
+        local<(S + ...) + 7> arra;
+        write<0, 0>(arra, "SELECT ");
+        write_args<7>(arra, arr...);
         return CSQLSelect(arra);
     }
+
+//    template<typename T0, int S0, typename T1, int S1>
+//    static constexpr auto equals(T0 (&arg0)[S0], T1 (&arg1)[S1]) {
+//        local<S0 - 1 + 3 + S1> arra;
+//        write<0, 0>(arra, arg0);
+//        write<S0 - 1, 0>(arra, " = ");
+//        write_args<S0 + 2>(arra, arg1);
+//        return CSQLEquals(arra);
+//    }
 };
 
 #endif // CSQL_H
